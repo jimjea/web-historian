@@ -27,15 +27,16 @@ exports.handleRequest = function (req, res) {
   }
 
   if(req.method === 'POST') {
-    var stringed = '';
-    req.on('data', function(chunk) {
-      stringed += chunk;
-    });
-    req.on('end', function() {
-      var post = stringed.slice(3);
-      console.log(post)
-      archive.isUrlInList(req, res, post, serveUpHTMLonPost, function() {console.log("error")})
-    });
+    if(req.url === '/') {
+      var stringed = '';
+      req.on('data', function(chunk) {
+        stringed += chunk;
+      });
+      req.on('end', function() {
+        var post = stringed.slice(3);
+        archive.isUrlInList(req, res, post, serveUpHTMLonPost, archive.addUrlToList)
+      });
+    }
   }
 };
 

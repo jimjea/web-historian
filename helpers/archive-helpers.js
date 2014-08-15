@@ -2,6 +2,7 @@ var fs = require('fs');
 var path = require('path');
 var _ = require('underscore');
 var httpHelp = require('../web/http-helpers');
+var request = require('request');
 
 /*
  * You will need to reuse the same paths many times over in the course of this sprint.
@@ -38,7 +39,6 @@ exports.readListOfUrls = function(){
 exports.isUrlInList = function(req, res, url, successCallback, errorCallback){ //success callback, error callback
   var result = url.slice(1);
   var stringData = "";
-  var finale;
   fs.readFile(exports.paths.list, function(err, data) {
     if (err) {console.log( err);};
     var stringed = data + ''
@@ -49,19 +49,40 @@ exports.isUrlInList = function(req, res, url, successCallback, errorCallback){ /
       //callback()
       successCallback(res, req, result);
     } else {
-      errorCallback(res, req);
+      errorCallback(res, req, result);
       // httpHelp.sendResponse(res, "404", 404)
     }
   });
 };
 
-exports.addUrlToList = function(req, res, callback){
-
+exports.addUrlToList = function(res, req, url){
+  console.log('In beginning of addUrlToList',url);
+  fs.appendFile(exports.paths.list, url);
 };
 
-exports.isURLArchived = function(url){
-
+exports.isURLArchived = function(url, index, collection){
+  // TODO: Need to just return true or false
+  fs.exists(exports.paths.archivedSites+'/'+url, function(exists) {
+      if (exists === false) {
+        exports.downloadUrls(url);
+      }
+    });
 };
 
-exports.downloadUrls = function(){
+exports.downloadUrls = function(url){
+  request('http://'+url, function (error, response, body) {
+    if (!error && response.statusCode == 200) {
+      fs.writeFile(exports.paths.archivedSites+'/'+url, body, function(err) {
+      });
+    }
+  })
 };
+
+
+
+
+
+
+
+
+
